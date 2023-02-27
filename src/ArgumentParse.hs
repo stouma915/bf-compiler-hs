@@ -9,18 +9,20 @@ data ParseResult = ShowHelp
                  | SourceFilePath String
                  | UnknownArg String
 
-parseArgs :: [String] -> IO [ParseResult]
-parseArgs [] = pure [ShowHelp]
-parseArgs args = parseArgs' args []
+parseArgs :: IO [String] -> IO [ParseResult]
+parseArgs ioArgs = ioArgs >>= parseArgs' []
   where
-  parseArgs' :: [String] -> [ParseResult] -> IO [ParseResult]
-  parseArgs' [] acc = pure acc
-  parseArgs' strs acc = do
+  parseArgs' :: [ParseResult] -> [String] -> IO [ParseResult]
+  parseArgs' acc [] = pure acc
+  parseArgs' acc strs = do
     let firstArg = head strs
     if isPrefixOf "-" firstArg then
       case firstArg of
-        "--help" -> parseArgs' (drop 1 strs) (acc ++ [ShowHelp])
-        "-h"     -> parseArgs' (drop 1 strs) (acc ++ [ShowHelp])
-        other    -> parseArgs' (drop 1 strs) (acc ++ [UnknownArg other])
+        "--help" ->
+          parseArgs' (acc ++ [ShowHelp]) (drop 1 strs)
+        "-h" ->
+          parseArgs' (acc ++ [ShowHelp]) (drop 1 strs)
+        other ->
+          parseArgs' (acc ++ [UnknownArg other]) (drop 1 strs)
     else
-      parseArgs' (drop 1 strs) (acc ++ [SourceFilePath firstArg])
+      parseArgs' (acc ++ [SourceFilePath firstArg]) (drop 1 strs)
