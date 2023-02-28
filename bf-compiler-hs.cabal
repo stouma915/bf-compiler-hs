@@ -25,6 +25,7 @@ source-repository head
 library
   exposed-modules:
       ArgumentParse
+      Compiler
   other-modules:
       Paths_bf_compiler_hs
   hs-source-dirs:

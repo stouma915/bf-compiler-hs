@@ -4,6 +4,7 @@ import System.Environment
 import System.Exit
 
 import ArgumentParse
+import Compiler
 
 version :: String
 version = "1.0.0"
@@ -42,7 +43,11 @@ main = do
       showHelp
     (RunCompilerMode srcFilePath) -> do
       content <- readFile srcFilePath
-      putStrLn content
+      case compileBf content of
+        (CompileSuccess asm) -> putStrLn asm
+        (SyntaxError msg) -> do
+          putStrLn "Syntax Error."
+          putStrLn msg
     (ShowUnknownArgErrorMode arg) -> do
       showUnknownArgError arg
       exitWith (ExitFailure 2)
