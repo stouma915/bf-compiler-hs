@@ -40,8 +40,9 @@ main = do
   case runMode of
     (ShowHelpMode) ->
       showHelp
-    (RunCompilerMode srcFilePath) ->
-      putStrLn $ "RunCompiler " ++ srcFilePath
+    (RunCompilerMode srcFilePath) -> do
+      content <- readFile srcFilePath
+      putStrLn content
     (ShowUnknownArgErrorMode arg) -> do
       showUnknownArgError arg
       exitWith (ExitFailure 2)
