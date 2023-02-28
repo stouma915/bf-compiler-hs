@@ -1,6 +1,7 @@
 module Main (main) where
 
 import System.Environment
+import System.Exit
 
 import ArgumentParse
 
@@ -41,5 +42,6 @@ main = do
       showHelp
     (RunCompilerMode srcFilePath) ->
       putStrLn $ "RunCompiler " ++ srcFilePath
-    (ShowUnknownArgErrorMode arg) ->
+    (ShowUnknownArgErrorMode arg) -> do
       showUnknownArgError arg
+      exitWith (ExitFailure 2)
