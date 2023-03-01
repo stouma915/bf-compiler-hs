@@ -21,10 +21,58 @@ assemblyPrefix =
   , "LB_0:"
   ]
 
+increaseByte :: [String]
+increaseByte =
+  [ "    inc byte [edi]"
+  ]
+
+decreaseByte :: [String]
+decreaseByte =
+  [ "    dec byte [edi]"
+  ]
+
+increasePointer :: [String]
+increasePointer =
+  [ "    inc edi"
+  ]
+
+decreasePointer :: [String]
+decreasePointer =
+  [ "    dec edi"
+  ]
+
+executePrint :: [String]
+executePrint =
+  [ "    mov eax, 4"
+  , "    mov ebx, 1"
+  , "    mov ecx, edi"
+  , "    mov edx, 1"
+  , "    int 0x80"
+  ]
+
+loopPrefix :: Int -> [String]
+loopPrefix labelNum =
+  [ ""
+  , "    jmp LB_" ++ (show $ labelNum + 1)
+  , ""
+  , "LB_" ++ (show $ labelNum + 1) ++ ":"
+  , "    cmp byte [edi], 0"
+  , "    je LB_" ++ (show $ labelNum + 2)
+  , ""
+  ]
+
+loopSuffix :: Int -> [String]
+loopSuffix labelNum =
+  [ ""
+  , "    jmp LB_" ++ (show labelNum)
+  , ""
+  , "LB_" ++ (show $ labelNum + 1) ++ ":"
+  ]
+
 assemblySuffix :: Int -> [String]
 assemblySuffix labelNum =
   [ ""
-  , "jmp LB_" ++ (show $ labelNum + 1)
+  , "    jmp LB_" ++ (show $ labelNum + 1)
   , ""
   , "LB_" ++ (show $ labelNum + 1) ++ ":"
   , "    mov eax, 1"
@@ -42,7 +90,31 @@ compileBf src = compileBf' 0 0 False assemblyPrefix
   compileBf' :: Int -> Int -> Bool -> [String] -> CompileResult
   compileBf' index labelNum isLooping acc =
     if index >= (length src) then
-      CompileSuccess $ intercalate "\n" (acc ++ (assemblySuffix labelNum))
+      if isLooping then
+        SyntaxError "']' wasn't found."
+      else
+        CompileSuccess $ intercalate "\n" (acc ++ (assemblySuffix labelNum))
     else
-      compileBf' (index + 1) labelNum isLooping acc
-    
+      case src !! index of
+        '+' ->
+          compileBf' (index + 1) labelNum isLooping (acc ++ increaseByte)
+        '-' ->
+          compileBf' (index + 1) labelNum isLooping (acc ++ decreaseByte)
+        '>' ->
+          compileBf' (index + 1) labelNum isLooping (acc ++ increasePointer)
+        '<' ->
+          compileBf' (index + 1) labelNum isLooping (acc ++ decreasePointer)
+        '.' ->
+          compileBf' (index + 1) labelNum isLooping (acc ++ executePrint)
+        '[' ->
+          if isLooping then
+            SyntaxError "Unexpected '['."
+          else
+            compileBf' (index + 1) (labelNum + 1) True (acc ++ (loopPrefix labelNum))
+        ']' ->
+          if not isLooping then
+            SyntaxError "Unexpected ']'."
+          else
+            compileBf' (index + 1) (labelNum + 1) False (acc ++ (loopSuffix labelNum))
+        _   ->
+          compileBf' (index + 1) labelNum isLooping acc
