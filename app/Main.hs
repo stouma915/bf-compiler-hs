@@ -48,6 +48,7 @@ main = do
         (SyntaxError msg) -> do
           putStrLn "Syntax Error."
           putStrLn msg
+          exitWith (ExitFailure 1)
     (ShowUnknownArgErrorMode arg) -> do
       showUnknownArgError arg
       exitWith (ExitFailure 2)
