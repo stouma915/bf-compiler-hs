@@ -45,8 +45,8 @@ main = do
       content <- readFile srcFilePath
       case compileBf content of
         (CompileSuccess asm) -> putStrLn asm
-        (SyntaxError msg) -> do
-          putStrLn "Syntax Error."
+        (SyntaxError line ind msg) -> do
+          putStrLn ("Syntax Error at Line " ++ (show line) ++ ", Index " ++ (show ind))
           putStrLn msg
           exitWith (ExitFailure 1)
     (ShowUnknownArgErrorMode arg) -> do

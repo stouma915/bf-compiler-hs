@@ -5,8 +5,10 @@ module Compiler
 
 import Data.List ( intercalate )
 
+import StringUtil
+
 data CompileResult = CompileSuccess String
-                   | SyntaxError String
+                   | SyntaxError Int Int String
 
 assemblyPrefix :: [String]
 assemblyPrefix =
@@ -84,6 +86,12 @@ assemblySuffix labelNum =
   , ""
   ]
 
+throwSyntaxError :: String -> Int -> String -> CompileResult
+throwSyntaxError src index msg = do
+  let line = getStrLine index src
+  let ind = getStrIndex index src
+  SyntaxError line ind msg
+
 compileBf :: String -> CompileResult
 compileBf src = compileBf' 0 0 False assemblyPrefix
   where
@@ -91,7 +99,7 @@ compileBf src = compileBf' 0 0 False assemblyPrefix
   compileBf' index labelNum isLooping acc =
     if index >= (length src) then
       if isLooping then
-        SyntaxError "']' wasn't found."
+        throwSyntaxError src index "']' wasn't found."
       else
         CompileSuccess $ intercalate "\n" (acc ++ (assemblySuffix labelNum))
     else
@@ -108,12 +116,12 @@ compileBf src = compileBf' 0 0 False assemblyPrefix
           compileBf' (index + 1) labelNum isLooping (acc ++ executePrint)
         '[' ->
           if isLooping then
-            SyntaxError "Unexpected '['."
+            throwSyntaxError src index "Unexpected '['."
           else
             compileBf' (index + 1) (labelNum + 1) True (acc ++ (loopPrefix labelNum))
         ']' ->
           if not isLooping then
-            SyntaxError "Unexpected ']'."
+            throwSyntaxError src index "Unexpected ']'."
           else
             compileBf' (index + 1) (labelNum + 1) False (acc ++ (loopSuffix labelNum))
         _   ->
