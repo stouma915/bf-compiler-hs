@@ -1,7 +1,7 @@
 name:                bf-compiler-hs
 version:             1.0.0
 github:              "stouma915/bf-compiler-hs"
-license:             MIT
+license:             "MIT"
 author:              "Sasaki Touma"
 copyright:           "2023 Sasaki Touma"
 
