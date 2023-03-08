@@ -23,7 +23,7 @@ isUnknownArg _              = False
 getString :: ParseResult -> String
 getString (ShowHelp)           = ""
 getString (SourceFilePath str) = str
-getString (UnknownArg     str) = str
+getString (UnknownArg str) = str
 
 data RunMode = ShowHelpMode
              | RunCompilerMode String
