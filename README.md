@@ -1,2 +1,2 @@
 # bf-compiler-hs
-Brainf**k Compiler Written in Haskell
+Brainf**k Compiler written in Haskell
